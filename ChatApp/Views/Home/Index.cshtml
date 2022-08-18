@@ -1,8 +1,99 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<ChatApp.Models.ChatViewModel>;
+@{
+    ViewData["Title"] = $"Chats";
+    Layout = null;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome @User.Identity.Name</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ChatApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ChatApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/normalize.css" />
+    <link rel="stylesheet" href="~/css/index.css">
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="left">
+
+        <div class="top">
+            <input type="text" placeholder="Search" />
+        </div>
+
+        <ul class="people">
+            @foreach (var c in Model)
+            {
+                <li class="person" onclick="loadChat('@c.RecipientName')">
+                    <img src="~/images/avatar.png" alt="" />
+                    <span class="name">@c.RecipientName</span>
+                    <span class="time">@c.LastMessage?.CreatedAt.ToShortTimeString()</span>
+                    <span class="preview">@c.LastMessage?.Text</span>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div class="right">
+        <div id="select-chat-div">
+            <p>Select a recepient...</p>
+        </div>
+        @foreach (var c in Model)
+        {
+            <div class="chat-wrapper" data-recipient="@c.RecipientName">
+                <div id="titleDiv">
+                    <span class="title">@c.RecipientName <i class="fas fa-circle" style="color:limegreen"></i></span>
+                </div>
+
+                <div class="chat">
+                    @{
+                        List<Message> messages = new();
+                        messages.AddRange(c.MyMessages);
+                        messages.AddRange(c.OtherMessages);
+                        foreach (var m in messages.OrderBy(x => x.CreatedAt))
+                        {
+                            if (c.MyMessages.Contains(m))
+                            {
+                                <div class="bubble me">
+                                    <span class="message-text">@m.Text</span>
+                                    <span class="message-time">@m.CreatedAt.ToShortTimeString()</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="bubble other">
+                                    <span class="message-text">@m.Text</span>
+                                    <span class="message-time">@m.CreatedAt.ToShortTimeString()</span>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+
+                <div id="writeDiv">
+                    <div class="write">
+                        <i class="fas fa-paperclip"></i>
+                        <input type="hidden" id="myUsername" value="@User.Identity?.Name" />
+                        <input class="textarea" type="text" id="message-text" placeholder="Write a message...">
+                        <i class="far fa-smile"></i>
+                        <button id="btn-send" onclick="sendMessage('@c.RecipientId')">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+ </div>
+ <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+     <script src="~/js/index.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script src="~/js/chat.js"></script>
+    <script src="~/js/textAutosize.js"></script>
+            </body>
+            </html>

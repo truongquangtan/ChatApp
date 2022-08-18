@@ -4,6 +4,8 @@ using ChatApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
+using ChatApp.Models;
+
 namespace ChatApp.Data
 {
     public partial class ChatAppImplementationContext : DbContext
@@ -17,6 +19,7 @@ namespace ChatApp.Data
         {
         }
 
+        public virtual DbSet<Group> Groups { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<User> Users { get; set; }
@@ -27,12 +30,56 @@ namespace ChatApp.Data
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("server=(local); database=ChatAppImplementation; uid=sa; pwd=1; TrustServerCertificate=True");
+                optionsBuilder.UseSqlServer("server=(local); database=ChatAppImplementation; uid=sa; pwd=1; TrustServerCertificate=true");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Group>(entity =>
+            {
+                entity.ToTable("Group");
+
+                entity.Property(e => e.Id)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("id");
+
+                entity.Property(e => e.FromUserId)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("from_user_id");
+
+                entity.Property(e => e.FromUserName)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("from_user_name");
+
+                entity.Property(e => e.ToUserId)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("to_user_id");
+
+                entity.Property(e => e.ToUserName)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("to_user_name");
+
+                entity.HasOne(d => d.FromUser)
+                    .WithMany(p => p.GroupFromUsers)
+                    .HasForeignKey(d => d.FromUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Group_User");
+
+                entity.HasOne(d => d.ToUser)
+                    .WithMany(p => p.GroupToUsers)
+                    .HasForeignKey(d => d.ToUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Group_User1");
+            });
+
             modelBuilder.Entity<Message>(entity =>
             {
                 entity.ToTable("Message");
@@ -43,34 +90,21 @@ namespace ChatApp.Data
                     .HasColumnType("datetime")
                     .HasColumnName("created_at");
 
-                entity.Property(e => e.FromUser)
+                entity.Property(e => e.GroupId)
                     .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false)
-                    .HasColumnName("from_user");
+                    .HasColumnName("group_id");
 
                 entity.Property(e => e.Text)
-                    .IsRequired()
                     .HasColumnType("ntext")
-                    .HasColumnName("text");
+                    .HasColumnName("message_text");
 
-                entity.Property(e => e.ToUser)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnName("to_user");
-
-                entity.HasOne(d => d.FromUserNavigation)
-                    .WithMany(p => p.MessageFromUserNavigations)
-                    .HasForeignKey(d => d.FromUser)
+                entity.HasOne(d => d.Group)
+                    .WithMany(p => p.Messages)
+                    .HasForeignKey(d => d.GroupId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Message_User");
-
-                entity.HasOne(d => d.ToUserNavigation)
-                    .WithMany(p => p.MessageToUserNavigations)
-                    .HasForeignKey(d => d.ToUser)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Message_User1");
+                    .HasConstraintName("FK_Message_Group");
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -108,7 +142,6 @@ namespace ChatApp.Data
                     .HasColumnName("full_name");
 
                 entity.Property(e => e.Password)
-                    .HasMaxLength(50)
                     .IsUnicode(false)
                     .HasColumnName("password");
 

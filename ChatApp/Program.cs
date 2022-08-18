@@ -1,6 +1,8 @@
 using ChatApp.Data;
 using ChatApp.Models;
 using ChatApp.Supporters.CustomIdentityProvider;
+using ChatApp.Hubs;
+using ChatApp.Services;
 using ChatApp.Supporters.DataGenerator;
 
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 // Add dbcontext
 builder.Services.AddDbContext<ChatAppImplementationContext>(options =>
@@ -29,6 +32,7 @@ builder.Services.AddIdentity<User, Role>(options =>
 }).AddDefaultTokenProviders();
 builder.Services.AddTransient<IUserStore<User>, UserStore>();
 builder.Services.AddTransient<IRoleStore<Role>, RoleStore>();
+builder.Services.AddTransient<IChatService, ChatService>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -78,5 +82,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
+
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

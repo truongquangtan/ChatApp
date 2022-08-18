@@ -36,7 +36,7 @@ namespace ChatApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
-            User user = null;
+            User? user = null;
             if (username != null)
             {
                 user = await _userManager.FindByNameAsync(username);
