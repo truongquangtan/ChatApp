@@ -1,7 +1,8 @@
-﻿@model List<ChatApp.Models.ChatViewModel>;
+﻿@model ChatApp.Models.MainViewModel;
 @{
     ViewData["Title"] = $"Chats";
     Layout = null;
+    var firstShowUserId = Model.ShowChatMessageForUserId == null ? "" : Model.ShowChatMessageForUserId;
 }
 
 <!DOCTYPE html>
@@ -16,19 +17,23 @@
     <link rel="stylesheet" href="~/css/normalize.css" />
     <link rel="stylesheet" href="~/css/index.css">
 </head>
-<body>
-
+<body onload="firstLoad()">
 <div class="wrapper">
     <div class="left">
-
+        <input type="hidden" name="firstShowUserId" id="firstShow" value="@firstShowUserId">
         <div class="top">
+            <form method="POST" asp-controller="Respondent" asp-action="RequestContact">
+                <input type="hidden" name="userId" value="@Model.AuthorUserId" />
+                <button type="submit" class="btn btn-primary">Get Contact</button>
+            </form>
             <input type="text" placeholder="Search" />
+
         </div>
 
         <ul class="people">
-            @foreach (var c in Model)
+            @foreach (var c in Model.ChatViewModels)
             {
-                <li class="person" onclick="loadChat('@c.RecipientName')">
+                <li class="person" onclick="loadChat('@c.RecipientId')">
                     <img src="~/images/avatar.png" alt="" />
                     <span class="name">@c.RecipientName</span>
                     <span class="time">@c.LastMessage?.CreatedAt.ToShortTimeString()</span>
@@ -42,9 +47,9 @@
         <div id="select-chat-div">
             <p>Select a recepient...</p>
         </div>
-        @foreach (var c in Model)
+        @foreach (var c in Model.ChatViewModels)
         {
-            <div class="chat-wrapper" data-recipient="@c.RecipientName">
+            <div class="chat-wrapper" data-recipient="@c.RecipientId">
                 <div id="titleDiv">
                     <span class="title">@c.RecipientName <i class="fas fa-circle" style="color:limegreen"></i></span>
                 </div>
@@ -58,17 +63,17 @@
                         {
                             if (c.MyMessages.Contains(m))
                             {
-                                <div class="bubble me">
-                                    <span class="message-text">@m.Text</span>
-                                    <span class="message-time">@m.CreatedAt.ToShortTimeString()</span>
-                                </div>
+                                                <div class="bubble me">
+                                                    <span class="message-text">@m.Text</span>
+                                                    <span class="message-time">@m.CreatedAt.ToShortTimeString()</span>
+                                                </div>
                             }
                             else
                             {
-                                <div class="bubble other">
-                                    <span class="message-text">@m.Text</span>
-                                    <span class="message-time">@m.CreatedAt.ToShortTimeString()</span>
-                                </div>
+                                                <div class="bubble other">
+                                                    <span class="message-text">@m.Text</span>
+                                                    <span class="message-time">@m.CreatedAt.ToShortTimeString()</span>
+                                                </div>
                             }
                         }
                     }
@@ -94,6 +99,5 @@
      <script src="~/js/index.js"></script>
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script src="~/js/chat.js"></script>
-    <script src="~/js/textAutosize.js"></script>
             </body>
             </html>

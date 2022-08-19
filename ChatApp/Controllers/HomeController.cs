@@ -13,7 +13,6 @@ using ChatApp.Models.DTO;
 
 namespace ChatApp.Controllers
 {
-    [Authorize]
     public class HomeController : Controller
     {
         private readonly ChatAppImplementationContext dbContext;
@@ -27,7 +26,7 @@ namespace ChatApp.Controllers
             this.chatService = chatService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? toShowId)
         {
             if (!User.Identity.IsAuthenticated)
             {
@@ -61,7 +60,14 @@ namespace ChatApp.Controllers
                 chats.Add(chat);
             }
 
-            return View(chats);
+            var model = new MainViewModel
+            {
+                AuthorUserId = user.Id,
+                ChatViewModels = chats,
+                ShowChatMessageForUserId = toShowId
+            };
+
+            return View(model);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
