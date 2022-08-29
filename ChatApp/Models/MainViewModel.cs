@@ -2,8 +2,13 @@
 {
     public class MainViewModel
     {
+        public string GroupId { get; set; }
+        public bool IsGroupActive { get; set; }
         public string AuthorUserId { get; set; }
-        public List<ChatViewModel> ChatViewModels { get; set; }
-        public string? ShowChatMessageForUserId { get; set; }
+        public string AuthorRole { get; set; }
+        public string RecipientName { get; set; }
+        public string RecipientId { get; set; }
+        public List<Message> MyMessages { get; set; }
+        public List<Message> OtherMessages { get; set; }
     }
 }

@@ -1,0 +1,171 @@
+﻿/*//////////////// RIGHT /////////////////////*/
+
+.right {
+    width: 100%;
+    position: relative;
+    border-left: solid 1px #e6e6e6;
+}
+
+#select-chat-div {
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    line-height: 100vh;
+}
+
+    #select-chat-div p {
+        margin: 0;
+    }
+
+
+#titleDiv {
+    width: 100%;
+    height: 50px;
+    text-align: center;
+    background-color: #EAEFFD;
+}
+
+    #titleDiv .title {
+        line-height: 50px;
+        font-weight: 600;
+    }
+
+.chat-wrapper {
+    display: block;
+}
+
+.chat {
+    height: calc(100vh - 50px);
+    overflow-y: scroll;
+}
+
+    .chat .bubble:last-child {
+        margin-bottom: calc(80px + 1.1rem);
+    }
+
+    .chat .bubble-wrapper {
+        width: 100vw;
+        height: fit-content;
+        position: relative;
+    }
+
+    .chat .bubble {
+        padding: 25px;
+        max-width: 80%;
+        width: fit-content;
+        border-radius: 20px;
+        position: relative;
+        display: inline-block;
+        clear: both;
+        margin: 5px;
+        margin-bottom: 2rem;
+        word-break: break-all;
+    }
+
+        .chat .bubble.me {
+            background-color: #557BF3;
+            float: right;
+        }
+
+            .chat .bubble.me .message-text {
+                color: #fff;
+            }
+
+        .chat .bubble.other {
+            background-color: #F6F8FD;
+            float: left;
+        }
+
+        .chat .bubble .message-time {
+            text-align: right;
+            position: absolute;
+            right: 5px;
+            bottom: -1rem;
+            color: #999;
+            font-size: 0.7rem;
+        }
+
+        .chat .bubble .message-notice {
+            text-align: center;
+            color: red;
+            font-size: 0.7rem;
+        }
+
+#writeDiv {
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    bottom: 10px;
+    height: fit-content;
+    background-color: #F6F8FD;
+    border-radius: 25px;
+}
+
+    #writeDiv .write {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: space-evenly;
+        margin: 0 20px;
+        height: inherit;
+    }
+
+        #writeDiv .write > i {
+            margin: 0 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all .3s cubic-bezier(0.075, 0.82, 0.165, 1);
+        }
+
+            #writeDiv .write > i:hover {
+                transform: scale(1.2);
+            }
+
+        #writeDiv .write input {
+            width: 90%;
+            height: fit-content;
+            margin: auto;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: transparent;
+            resize: none;
+            overflow: hidden;
+            line-height: 20px;
+        }
+
+#btn-send {
+    background-color: #557BF3;
+    border: none;
+    border-radius: 50%;
+    outline: none;
+    transition: all .3s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+    #btn-send:hover {
+        transform: scale(1.1);
+    }
+
+    #btn-send i {
+        color: #fff;
+        font-size: 20px;
+        margin: 10px 6px;
+        margin-right: 7px;
+        padding: 0;
+    }
+
+
+#writeInfo {
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    bottom: 10px;
+    height: fit-content;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-evenly;
+    margin: 0 20px;
+    height: inherit;
+}

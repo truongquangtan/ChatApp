@@ -1,18 +1,13 @@
 ﻿"use strict";
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build(),
-    connectionId;
+var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+var connectionId = 'a';
 
 //Disable send button until connection is established
 
-connection.start().then(function () {
-    connection.invoke('AddToRespondentGroup');
-}).catch(function (err) {
-    return console.error(err.toString());
-});
-
-connection.on("ReceiveRequest", function (id, fullName, phone, email) {
-    var bodyAppend = '<tr class="candidates-list" id=' + id + '>' +
+connection.on("ReceiveRequest", function (id, fullName, phone, email, contactId) {
+    var bodyAppend = '<tr class="candidates-list '+id+'">' +
         '<td class= "title">' +
         '<div class="thumb">' +
         '<img class="img-fluid" src="https://t3.ftcdn.net/jpg/02/09/37/00/360_F_209370065_JLXhrc5inEmGl52SyvSPeVB23hB6IjrR.jpg" alt="">' +
@@ -32,44 +27,40 @@ connection.on("ReceiveRequest", function (id, fullName, phone, email) {
             '</div>' +
             '</td>' +
         '<td>' +
-        '<button class="btn btn-primary" onclick="removeRequest(\'' + id + '\')">' +
-            'Contact' +
+        '<form method="POST" action="SetContact">' +
+        '<input type="hidden" name="contactId" value="' + contactId + '" />' +
+        '<input type="hidden" name="userId" value="' + id + '" />' +
+        '<input type="hidden" name="connectionId" value="' + connectionId + '" />' +
+        '<button type="submit" class="btn btn-primary">' +
+            'Contact To' +
             '</button>' +
-    '</td>' +
-    ' </tr>';
-    $("#users-show").append(bodyAppend);
+    '</form></td>' +
+        ' </tr>';
+    $("#users-show").prepend(bodyAppend);
 });
 
-connection.on("RemoveRequest", removeRequest);
+connection.on("Remove", function (userId) {
+    $("tr.candidates-list." + userId).remove();
+});
 
-var removeRequest = function (id) {
-    $("#" + id).remove();
+var getConnectionId = function () {
+    return connectionId;
 };
 
-/*
-var contact = function (recipientId) {
-    event.preventDefault();
-
-    var $text = $("#message-text").val();
-
-    $.ajax({
-        type: 'POST',
-        url: '/Chat/SendMessage',
-        data: { to: recipientId, text: $text },
-        cache: false,
-        success: function () {
-            $(".textarea").val('');
-            $(".chat-wrapper.shown .chat").append('<div class="bubble me"><span class="message-text">' + $text + ' </span>'
-                + '<span class="message-time">' + getTimeNow() + '</span></div>');
-            scrollToBottom();
-        },
-        error: function (err) {
-            alert("Failed to send message!" + err.toString());
-        }
-    });
-}
-*/
-
 function getTimeNow() {
-    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
+    return Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+var firstLoad = function () {
+    connection.start().then(function () {
+        connection.invoke('AddToRespondentGroup');
+        connection.invoke('GetConnectionId')
+            .then(function (Id) {
+                $('.connectionId').val(Id);
+                connectionId = Id;
+            });
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+    //$('.connectionId').val(connectionId);
+};

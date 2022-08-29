@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using ChatApp.Supporters.Constants;
 
 namespace ChatApp.Hubs
 {
@@ -6,11 +7,15 @@ namespace ChatApp.Hubs
     {
         public async Task AddToRespondentGroup()
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, "Respondent");
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupName.RESPONDENT_GROUP);
         }
-        public async Task RemoveFromRespondentGroup(string groupName)
+        public async Task RemoveFromRespondentGroup()
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Respondent");
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName.RESPONDENT_GROUP);
+        }
+        public string GetConnectionId()
+        {
+            return Context.ConnectionId;
         }
     }
 }

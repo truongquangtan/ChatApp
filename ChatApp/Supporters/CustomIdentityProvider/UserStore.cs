@@ -109,14 +109,17 @@ namespace ChatApp.Supporters.CustomIdentityProvider
 
         public async Task<bool> IsInRoleAsync(User user, string roleName, CancellationToken cancellationToken)
         {
-            var result = await _context.UserRoles.Where(user => user.Id == user.Id).ToListAsync();
-            var role = await _context.Roles.Where(role => role.Name == roleName).FirstOrDefaultAsync();
+            var result = await _context.UserRoles.Where(userInList => userInList.Id == user.Id).ToListAsync();
+            if(result == null)
+            {
+                return false;
+            }
             foreach(var userRole in result)
             {
-                if(userRole.RoleId == role.Id)
+                if(userRole.RoleName == roleName)
                 {
                     return true;
-                }    
+                }
             }
             return false;
         }

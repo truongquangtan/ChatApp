@@ -26,48 +26,94 @@ namespace ChatApp.Controllers
             this.chatService = chatService;
         }
 
-        public async Task<IActionResult> Index(string? toShowId)
+        public async Task<IActionResult> Index()
         {
-            if (!User.Identity.IsAuthenticated)
+            try
             {
-                return RedirectToAction("Login", "Account");
-            }
-            var user = await _userManager.GetUserAsync(HttpContext.User);
-
-            GroupDTO groupDTO = await chatService.GetContactInfomationAsync(user);
-
-            var allMessages = await chatService.GetAllMessagesInGroupsAsync(groupDTO.ContactGroupIdList);
-
-            var chats = new List<ChatViewModel>();
-            foreach (var i in groupDTO.ContactUserList)
-            {
-                if (i == user) continue;
-
-                var chat = new ChatViewModel()
+                if (!User.Identity.IsAuthenticated)
                 {
-                    MyMessages = allMessages.Where(x => x.Group.FromUserId == user.Id && x.Group.ToUserId == i.Id).ToList(),
-                    OtherMessages = allMessages.Where(x => x.Group.FromUserId == i.Id && x.Group.ToUserId == user.Id).ToList(),
-                    RecipientName = i.FullName,
-                    RecipientId = i.Id
+                    return RedirectToAction("Login", "Account");
+                }
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+
+                var groups = await chatService.GetAllGroupsContain(user);
+
+                var chatViewModels = new List<ChatViewModel>();
+
+                foreach(var group in groups)
+                {
+                    var message = await chatService.GetLastMessageOfGroup(group.Id);
+                    if(message != null)
+                    {
+                        ChatViewModel chat = new ChatViewModel
+                        {
+                            GroupId = group.Id,
+                            IsGroupActive = group.IsActive,
+                            LastMessage = message.Text,
+                            LastMessageTime = message.CreatedAt,
+                            RecipientId = role == RoleName.USER ? group.ToUserId : group.FromUserId,
+                            RecipientName = role == RoleName.USER ? group.ToUserName : group.FromUserName
+                        };
+                        chatViewModels.Add(chat);
+                    }    
+                }
+
+                var model = new FirstMessageModel()
+                {
+                    AuthorId = user.Id,
+                    AuthorRole = role,
+                    GroupsMessage = chatViewModels.OrderByDescending(chat => chat.LastMessageTime).ToList()
+                };
+                return View(model);
+            }
+            catch(Exception ex)
+            {
+                return NotFound();
+            }
+        }
+
+        public async Task<IActionResult> Chat(string groupId)
+        {
+            try
+            {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+
+                var group = dbContext.Groups.Find(groupId);
+
+                if(group == null)
+                {
+                    throw new Exception("Can not find group");
+                }    
+
+                if(group.FromUserId != user.Id && group.ToUserId != user.Id)
+                {
+                    throw new Exception("User is not in group");
+                }
+                var allMessages = await chatService.GetAllMessagesInGroupAsync(groupId);
+
+                var model = new MainViewModel
+                {
+                    GroupId = groupId,
+                    IsGroupActive = group.IsActive,
+                    AuthorUserId = user.Id,
+                    AuthorRole = (await _userManager.GetRolesAsync(user)).FirstOrDefault(),
+                    RecipientName = role == RoleName.USER ? group.ToUserName : group.FromUserName,
+                    RecipientId = role == RoleName.USER ? group.ToUserId : group.FromUserId,
+                    MyMessages = role == RoleName.USER ? allMessages.Where(message => message.IsFromRespondent == false).ToList() : allMessages.Where(message => message.IsFromRespondent).ToList(),
+                    OtherMessages = role == RoleName.USER ? allMessages.Where(message => message.IsFromRespondent).ToList() : allMessages.Where(message => message.IsFromRespondent == false).ToList()
                 };
 
-                var chatMessages = new List<Message>();
-                chatMessages.AddRange(chat.MyMessages);
-                chatMessages.AddRange(chat.OtherMessages);
-
-                chat.LastMessage = chatMessages.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
-
-                chats.Add(chat);
-            }
-
-            var model = new MainViewModel
+                return View(model);
+            } catch (Exception ex)
             {
-                AuthorUserId = user.Id,
-                ChatViewModels = chats,
-                ShowChatMessageForUserId = toShowId
-            };
-
-            return View(model);
+                return NotFound();
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

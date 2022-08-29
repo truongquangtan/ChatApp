@@ -1,14 +1,29 @@
-﻿function loadChat(name) {
-    $(".chat-wrapper.shown").removeClass("shown");
-    $("#select-chat-div").hide();
+﻿var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
-    $chat = $('*[data-recipient="' + name + '"]');
-    $chat.addClass("shown");
-    scrollToBottom();
-};
-
-$(".write input").keyup(function (event) {
-    if (event.keyCode === 13) {
-        $("#btn-send").click();
-    }
+connection.start().then().catch(function (err) {
+    return console.error(err.toString());
 });
+
+connection.on("ReloadPage", function (groupId) {
+    window.location.replace(window.location.href.replace("Index", "Chat?groupId=" + groupId));
+});
+
+window.onbeforeunload = function () {
+    $.ajax({
+        type: 'POST',
+        url: '/Respondent/RemoveRequest',
+        cache: false
+    });
+}
+
+var requestToContact = function (userId) {
+    $.ajax({
+        type: 'GET',
+        url: '/Respondent/RequestContact',
+        data: { userId: userId },
+        cache: false,
+        error: function (err) {
+            alert('Error when get contact');
+        }
+    });
+}

@@ -23,5 +23,6 @@ namespace ChatApp.Models
         public virtual ICollection<Group> GroupFromUsers { get; set; }
         public virtual ICollection<Group> GroupToUsers { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<ContactRequest> ContactRequests { get; set; }
     }
 }

@@ -15,6 +15,8 @@ namespace ChatApp.Models
         public string ToUserId { get; set; }
         public string? FromUserName { get; set; }
         public string? ToUserName { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public virtual User FromUser { get; set; }
         public virtual User ToUser { get; set; }

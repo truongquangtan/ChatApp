@@ -12,7 +12,7 @@ namespace ChatApp.Models
         public string GroupId { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Text { get; set; }
-
+        public bool IsFromRespondent { get; set; }
         public virtual Group Group { get; set; }
     }
 }

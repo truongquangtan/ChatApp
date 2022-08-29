@@ -24,7 +24,8 @@ namespace ChatApp.Data
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserRole> UserRoles { get; set; }
-
+        public virtual DbSet<ContactRequest> ContactRequests { get; set; }
+        public virtual DbSet<EndConversationRequest> EndConversationRequests { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -62,10 +63,18 @@ namespace ChatApp.Data
                     .IsUnicode(false)
                     .HasColumnName("to_user_id");
 
+                entity.Property(e => e.IsActive)
+                .HasColumnName("is_active");
+
                 entity.Property(e => e.ToUserName)
                     .HasMaxLength(100)
                     .IsUnicode(false)
                     .HasColumnName("to_user_name");
+
+                entity.Property(e => e.CreatedAt)
+                .IsRequired()
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
 
                 entity.HasOne(d => d.FromUser)
                     .WithMany(p => p.GroupFromUsers)
@@ -99,6 +108,9 @@ namespace ChatApp.Data
                 entity.Property(e => e.Text)
                     .HasColumnType("ntext")
                     .HasColumnName("message_text");
+
+                entity.Property(e => e.IsFromRespondent)
+                .HasColumnName("is_from_respondent");
 
                 entity.HasOne(d => d.Group)
                     .WithMany(p => p.Messages)
@@ -198,6 +210,58 @@ namespace ChatApp.Data
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserRole_User");
+            });
+
+            modelBuilder.Entity<ContactRequest>(entity =>
+            {
+                entity.ToTable("ContactRequest");
+
+                entity.Property(e => e.Id)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("id");
+                entity.Property(e => e.UserId)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("user_id");
+                entity.HasOne(d => d.User)
+                .WithMany(p => p.ContactRequests)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ContactRequest_User");
+            });
+
+            modelBuilder.Entity<EndConversationRequest>(entity =>
+            {
+                entity.ToTable("EndConversationRequest");
+
+                entity.Property(e => e.Id)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("id");
+
+                entity.Property(e => e.ConfirmUserId)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("confirm_user_id");
+
+                entity.Property(e => e.RequestUserId)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("request_user_id");
+
+                entity.Property(e => e.GroupId)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("group_id");
+
+                entity.Property(e => e.IsConfimed)
+                .HasColumnName("is_confirmed");
+
+                entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
             });
 
             OnModelCreatingPartial(modelBuilder);

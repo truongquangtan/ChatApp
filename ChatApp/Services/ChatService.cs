@@ -15,40 +15,45 @@ namespace ChatApp.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<Message> AddMessageAsync(Group group, string message)
+        public async Task<Message> AddMessageAsync(Group group, string message, bool isFromRespondent)
         {
             Message messageEntity = new Message
             {
                 GroupId = group.Id,
                 Text = message,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                IsFromRespondent = isFromRespondent
             };
             await dbContext.AddAsync(messageEntity);
             await dbContext.SaveChangesAsync();
             return messageEntity;
         }
 
-        public async Task<Group> EnsureGroupAsync(User user, User recipient)
+        public async Task<Group> CreateGroupAsync(User user, User recipient)
         {
-            Group? group = await dbContext.Groups.Where(group => group.FromUserId == user.Id && group.ToUserId == recipient.Id).FirstOrDefaultAsync();
-            if (group == null)
+            var group = new Group()
             {
-                group = new Group()
-                {
-                    FromUserId = user.Id,
-                    ToUserId = recipient.Id,
-                    FromUserName = user.Username,
-                    ToUserName = recipient.Username
-                };
-                await dbContext.Groups.AddAsync(group);
-                await dbContext.SaveChangesAsync();
-            }
+                FromUserId = user.Id,
+                ToUserId = recipient.Id,
+                FromUserName = user.Username,
+                ToUserName = recipient.Username,
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            };
+            await dbContext.Groups.AddAsync(group);
+            await dbContext.SaveChangesAsync();
             return group;
         }
 
         public async Task<List<Message>> GetAllMessagesInGroupsAsync(List<string> groupIdList)
         {
             return await dbContext.Messages.Where(message => groupIdList.Contains(message.GroupId)).Include(message => message.Group).ToListAsync();
+        }
+
+        public async Task<List<Group>> GetAllGroupsContain(User user)
+        {
+            var groupList = await dbContext.Groups.Where(group => group.FromUserId == user.Id || group.ToUserId == user.Id).Include(group => group.FromUser).Include(group => group.ToUser).ToListAsync();
+            return groupList;
         }
 
         public async Task<GroupDTO> GetContactInfomationAsync(User user)
@@ -79,5 +84,18 @@ namespace ChatApp.Services
             }
             return users;
         }
+        
+        public async Task<List<Message>> GetAllMessagesInGroupAsync(string groupId)
+        {
+            var messages = await dbContext.Messages.AsNoTracking().Where(message => message.GroupId == groupId).ToListAsync();
+            return messages;
+        }
+
+        public async Task<Message> GetLastMessageOfGroup(string groupId)
+        {
+            var message = await dbContext.Messages.Where(message => message.GroupId == groupId).OrderByDescending(message => message.CreatedAt).FirstOrDefaultAsync();
+            return message;
+        }
+
     }
 }

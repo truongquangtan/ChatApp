@@ -1,8 +1,8 @@
-﻿@model ChatApp.Models.MainViewModel;
+﻿@using ChatApp.Supporters.Constants;
+@model ChatApp.Models.FirstMessageModel;
 @{
     ViewData["Title"] = $"Chats";
     Layout = null;
-    var firstShowUserId = Model.ShowChatMessageForUserId == null ? "" : Model.ShowChatMessageForUserId;
 }
 
 <!DOCTYPE html>
@@ -17,87 +17,55 @@
     <link rel="stylesheet" href="~/css/normalize.css" />
     <link rel="stylesheet" href="~/css/index.css">
 </head>
-<body onload="firstLoad()">
-<div class="wrapper">
-    <div class="left">
-        <input type="hidden" name="firstShowUserId" id="firstShow" value="@firstShowUserId">
-        <div class="top">
-            <form method="POST" asp-controller="Respondent" asp-action="RequestContact">
-                <input type="hidden" name="userId" value="@Model.AuthorUserId" />
-                <button type="submit" class="btn btn-primary">Get Contact</button>
-            </form>
-            <input type="text" placeholder="Search" />
+<body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css" integrity="sha256-2XFplPlrFClt0bIdPgpz8H7ojnk10H69xRqd9+uTShA=" crossorigin="anonymous" />
+    <div class="wrapper">
+        <div class="middle">
+            <div class="top">
+                @if (Model.AuthorRole == RoleName.USER)
+                {
+                        <button class="btn btn-primary" onclick="requestToContact('@Model.AuthorId')">I want to be supported</button>
+                }
+                else
+                {
+                    <form method="GET" asp-controller="Respondent" asp-action="GetContact">
+                        <button type="submit" class="btn btn-primary">Get Contact</button>
+                    </form>
+                }
+                <input type="text" placeholder="Search" />
 
-        </div>
-
-        <ul class="people">
-            @foreach (var c in Model.ChatViewModels)
-            {
-                <li class="person" onclick="loadChat('@c.RecipientId')">
-                    <img src="~/images/avatar.png" alt="" />
-                    <span class="name">@c.RecipientName</span>
-                    <span class="time">@c.LastMessage?.CreatedAt.ToShortTimeString()</span>
-                    <span class="preview">@c.LastMessage?.Text</span>
-                </li>
-            }
-        </ul>
-    </div>
-
-    <div class="right">
-        <div id="select-chat-div">
-            <p>Select a recepient...</p>
-        </div>
-        @foreach (var c in Model.ChatViewModels)
-        {
-            <div class="chat-wrapper" data-recipient="@c.RecipientId">
-                <div id="titleDiv">
-                    <span class="title">@c.RecipientName <i class="fas fa-circle" style="color:limegreen"></i></span>
-                </div>
-
-                <div class="chat">
-                    @{
-                        List<Message> messages = new();
-                        messages.AddRange(c.MyMessages);
-                        messages.AddRange(c.OtherMessages);
-                        foreach (var m in messages.OrderBy(x => x.CreatedAt))
-                        {
-                            if (c.MyMessages.Contains(m))
-                            {
-                                                <div class="bubble me">
-                                                    <span class="message-text">@m.Text</span>
-                                                    <span class="message-time">@m.CreatedAt.ToShortTimeString()</span>
-                                                </div>
-                            }
-                            else
-                            {
-                                                <div class="bubble other">
-                                                    <span class="message-text">@m.Text</span>
-                                                    <span class="message-time">@m.CreatedAt.ToShortTimeString()</span>
-                                                </div>
-                            }
-                        }
-                    }
-                </div>
-
-                <div id="writeDiv">
-                    <div class="write">
-                        <i class="fas fa-paperclip"></i>
-                        <input type="hidden" id="myUsername" value="@User.Identity?.Name" />
-                        <input class="textarea" type="text" id="message-text" placeholder="Write a message...">
-                        <i class="far fa-smile"></i>
-                        <button id="btn-send" onclick="sendMessage('@c.RecipientId')">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
             </div>
-        }
+
+            <ul class="people">
+                @foreach (var groupMessage in Model.GroupsMessage)
+                {
+                    var routeValue = new Dictionary<string, string> { { "groupId", groupMessage.GroupId } };
+                    <a asp-controller="Home" asp-action="Chat" asp-all-route-data="@routeValue">
+                    <li class="person">
+                        <img src="~/images/avatar.png" alt="" />
+                        <span class="name">@groupMessage.RecipientName</span>
+                            <span class="time">@groupMessage.LastMessageTime.ToShortTimeString()
+                                @if (groupMessage.IsGroupActive)
+                                {
+                                    <i class="fa fa-podcast text-success"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-podcast text-danger"></i>
+                                }
+                            </span>
+                            <span class="preview">@groupMessage.LastMessage</span>
+                    </li>
+
+                    </a>
+                }
+
+            </ul>
+        </div>
     </div>
- </div>
- <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-     <script src="~/js/index.js"></script>
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-    <script src="~/js/chat.js"></script>
-            </body>
-            </html>
+    <script src="~/js/index.js"></script>
+</body>
+</html>

@@ -83,7 +83,7 @@ namespace ChatApp.Controllers
                 var result = await _userManager.CreateAsync(user, request.Password);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, RoleName.USER);
+                    var IR = await _userManager.AddToRoleAsync(await _userManager.FindByIdAsync(user.Id), RoleName.USER);
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Home");
                 }

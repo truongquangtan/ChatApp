@@ -4,10 +4,11 @@ namespace ChatApp.Models
 {
     public class ChatViewModel
     {
-        public string RecipientName { get; set; }
+        public string GroupId { get; set; }
+        public bool IsGroupActive { get; set; }
         public string RecipientId { get; set; }
-        public List<Message> MyMessages { get; set; }
-        public List<Message> OtherMessages { get; set; }
-        public Message LastMessage { get; set; }
+        public string RecipientName { get; set; }
+        public string LastMessage { get; set; }
+        public DateTime LastMessageTime { get; set; }
     }
 }
