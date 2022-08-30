@@ -33,7 +33,7 @@ namespace ChatApp.Controllers
         {
             return View();
         }
-
+        [Authorize(Roles = RoleName.USER)]
         public async Task<IActionResult> RequestContact(string userId)
         {
             using var dbContext = new ChatAppImplementationContext();
@@ -69,6 +69,7 @@ namespace ChatApp.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = RoleName.COLLABORATOR)]
         public async Task<IActionResult> GetContact()
         {
             using var dbContext = new ChatAppImplementationContext();
@@ -87,6 +88,7 @@ namespace ChatApp.Controllers
             }
             return View(model);
         }
+        [Authorize(Roles = RoleName.COLLABORATOR)]
         [HttpPost]
         public async Task<IActionResult> SetContact(string userId, string connectionId, string contactId)
         {
@@ -140,6 +142,7 @@ namespace ChatApp.Controllers
             }
         }
 
+        [Authorize(Roles = RoleName.USER)]
         [HttpPost]
         public async Task<IActionResult> RemoveRequest()
         {

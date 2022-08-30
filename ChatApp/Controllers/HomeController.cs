@@ -4,10 +4,12 @@ using ChatApp.Services;
 using ChatApp.Supporters.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Diagnostics;
 
 namespace ChatApp.Controllers
 {
+    [Authorize(Roles = RoleName.USER + "," + RoleName.COLLABORATOR)]
     public class HomeController : Controller
     {
         private readonly ChatAppImplementationContext dbContext;
