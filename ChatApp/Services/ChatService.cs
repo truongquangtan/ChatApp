@@ -1,6 +1,7 @@
 ﻿using ChatApp.Models;
 using ChatApp.Models.DTO;
 using ChatApp.Data;
+using ChatApp.Supporters.Constants;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -90,11 +91,34 @@ namespace ChatApp.Services
             var messages = await dbContext.Messages.AsNoTracking().Where(message => message.GroupId == groupId).ToListAsync();
             return messages;
         }
-
         public async Task<Message> GetLastMessageOfGroup(string groupId)
         {
             var message = await dbContext.Messages.Where(message => message.GroupId == groupId).OrderByDescending(message => message.CreatedAt).FirstOrDefaultAsync();
             return message;
+        }
+
+        public async Task<bool> CheckGroupBeingEndRequested(ChatAppImplementationContext dbContext, Group group)
+        {
+            var endRequest = dbContext.EndConversationRequests.Where(request => request.GroupId == group.Id).FirstOrDefault();
+            if (endRequest != null && endRequest.CreatedAt.AddMinutes(TimeRequestExist.TIME_EXIST_IN_MINUTE).CompareTo(DateTime.Now) < 0)
+            {
+                using var transaction = dbContext.Database.BeginTransaction();
+                try
+                {
+                    dbContext.EndConversationRequests.Remove(endRequest);
+                    group.IsActive = false;
+                    dbContext.Groups.Update(group);
+                    await dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    throw ex;
+                }
+            }
+            return false;
         }
 
     }

@@ -1,6 +1,6 @@
 ﻿/*//////////////// RIGHT /////////////////////*/
 
-.right {
+.site {
     width: 100%;
     position: relative;
     border-left: solid 1px #e6e6e6;
@@ -168,4 +168,10 @@
     justify-content: space-evenly;
     margin: 0 20px;
     height: inherit;
+}
+
+#endButton {
+    float: right;
+    margin-top: 5px;
+    margin-right: 5px;
 }

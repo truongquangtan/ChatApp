@@ -76,6 +76,9 @@ namespace ChatApp.Data
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
 
+                entity.Property(e => e.IsBeingEndRequested)
+                .HasColumnName("is_being_end_requested");
+
                 entity.HasOne(d => d.FromUser)
                     .WithMany(p => p.GroupFromUsers)
                     .HasForeignKey(d => d.FromUserId)

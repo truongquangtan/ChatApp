@@ -44,7 +44,7 @@
                     <li class="person">
                         <img src="~/images/avatar.png" alt="" />
                         <span class="name">@groupMessage.RecipientName</span>
-                            <span class="time">@groupMessage.LastMessageTime.ToShortTimeString()
+                            <span class="time">@groupMessage.LastMessageTime.ToString("dd-MM-yyyy HH:mm")
                                 @if (groupMessage.IsGroupActive)
                                 {
                                     <i class="fa fa-podcast text-success"></i>

@@ -20,13 +20,13 @@
 <body onload="scrollToBottom()">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css" integrity="sha256-2XFplPlrFClt0bIdPgpz8H7ojnk10H69xRqd9+uTShA=" crossorigin="anonymous" />
     <div class="wrapper">
-        <div class="right">
+        <div class="site">
             <div class="chat-wrapper" data-recipient="@Model.RecipientId">
                 <div id="titleDiv">
                     <span class="title">@Model.RecipientName </span>
                     @if(Model.IsGroupActive)
                     {
-                        <button class="btn btn-danger" onclick="endConversation('@Model.GroupId')" id="endButton">End Conversation</button>
+                        <button class="btn btn-danger" onclick="endConversation('@Model.GroupId')" id="endButton" data-toggle="tooltip" data-placement="left" title="End Conversation"><i class="fa fa-user-times"></i></button>
                     }
                 </div>
 

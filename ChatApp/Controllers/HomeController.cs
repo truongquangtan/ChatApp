@@ -1,15 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-
+﻿using ChatApp.Data;
 using ChatApp.Models;
-using ChatApp.Supporters.Constants;
-using ChatApp.Data;
-using ChatApp.Hubs;
 using ChatApp.Services;
-using ChatApp.Models.DTO;
+using ChatApp.Supporters.Constants;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace ChatApp.Controllers
 {
@@ -43,6 +38,10 @@ namespace ChatApp.Controllers
 
                 foreach(var group in groups)
                 {
+                    if(group.IsBeingEndRequested)
+                    {
+                        await chatService.CheckGroupBeingEndRequested(dbContext, group);
+                    }    
                     var message = await chatService.GetLastMessageOfGroup(group.Id);
                     if(message != null)
                     {
@@ -58,12 +57,15 @@ namespace ChatApp.Controllers
                         chatViewModels.Add(chat);
                     }    
                 }
+                var groupsMessage = new List<ChatViewModel>();
+                groupsMessage.AddRange(chatViewModels.Where(chat => chat.IsGroupActive).OrderByDescending(chat => chat.LastMessageTime).ToList());
+                groupsMessage.AddRange(chatViewModels.Where(chat => chat.IsGroupActive == false).OrderByDescending(chat => chat.LastMessageTime).ToList());
 
                 var model = new FirstMessageModel()
                 {
                     AuthorId = user.Id,
                     AuthorRole = role,
-                    GroupsMessage = chatViewModels.OrderByDescending(chat => chat.LastMessageTime).ToList()
+                    GroupsMessage = groupsMessage
                 };
                 return View(model);
             }
@@ -95,6 +97,16 @@ namespace ChatApp.Controllers
                 {
                     throw new Exception("User is not in group");
                 }
+
+                var endRequest = dbContext.EndConversationRequests.Where(request => request.GroupId == groupId).FirstOrDefault();
+                if (endRequest != null && endRequest.CreatedAt.AddMinutes(TimeRequestExist.TIME_EXIST_IN_MINUTE).CompareTo(DateTime.Now) < 0)
+                {
+                    dbContext.EndConversationRequests.Remove(endRequest);
+                    group.IsActive = false;
+                    dbContext.Groups.Update(group);
+                    await dbContext.SaveChangesAsync();
+                }
+
                 var allMessages = await chatService.GetAllMessagesInGroupAsync(groupId);
 
                 var model = new MainViewModel

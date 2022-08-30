@@ -36,25 +36,35 @@ namespace ChatApp.Controllers
         {
             try
             {
-
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
                 var group = await dbContext.Groups.Where(group => group.Id == to).Include(group => group.FromUser).Include(group => group.ToUser).FirstOrDefaultAsync();
 
                 if(group == null || group.IsActive == false)
                 {
                     throw new Exception("Group is not existed");
+                    await _hubContext.Clients.User(user.Id).SendAsync("ReloadPageToIndex");
                 }
 
-                var user = await _userManager.GetUserAsync(HttpContext.User);
-                var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-                if(user.Id != group.FromUserId && user.Id != group.ToUserId)
+                if (user.Id != group.FromUserId && user.Id != group.ToUserId)
                 {
                     throw new Exception("Group is not of user");
                 }
-                var recipient = role == RoleName.USER ? group.ToUser : group.FromUser;
-                Message message = await chatService.AddMessageAsync(group, text, role != RoleName.USER);
 
-                await _hubContext.Clients.User(recipient.Id).SendAsync("ReceiveMessage", message.Text, message.CreatedAt.ToShortTimeString());
-            } catch (Exception)
+                if (group.IsBeingEndRequested)
+                {
+                    if(await chatService.CheckGroupBeingEndRequested(dbContext, group))
+                    {
+                        await _hubContext.Clients.User(user.Id).SendAsync("ReloadPageToIndex");
+                        throw new Exception("The group is closed");
+                    }
+                }
+
+                 var recipient = role == RoleName.USER ? group.ToUser : group.FromUser;
+                 Message message = await chatService.AddMessageAsync(group, text, role != RoleName.USER);
+                 await _hubContext.Clients.User(recipient.Id).SendAsync("ReceiveMessage", message.Text, message.CreatedAt.ToShortTimeString());
+            }
+            catch (Exception)
             {
                 return StatusCode(500);
             }
@@ -81,9 +91,31 @@ namespace ChatApp.Controllers
                 }
 
                 var user = await _userManager.GetUserAsync(HttpContext.User);
+                if(await EndConversationRequestTransaction(user, group))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    throw new Exception("Error in add request transaction");
+                }
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        public async Task<bool> EndConversationRequestTransaction(User user, Group group)
+        {
+            using var dbContext = new ChatAppImplementationContext();
+            using var transaction = await dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
                 var request = new EndConversationRequest()
                 {
-                    GroupId = groupId,
+                    GroupId = group.Id,
                     IsConfimed = false,
                     RequestUserId = user.Id,
                     ConfirmUserId = group.FromUserId == user.Id ? group.ToUserId : group.FromUserId,
@@ -92,15 +124,17 @@ namespace ChatApp.Controllers
                 };
 
                 dbContext.EndConversationRequests.Add(request);
+                group.IsBeingEndRequested = true;
+                dbContext.Groups.Update(group);
                 await dbContext.SaveChangesAsync();
-
                 await _hubContext.Clients.User(request.ConfirmUserId).SendAsync("RequestReached", request.Id);
-
-                return Ok();
+                await transaction.CommitAsync();
+                return true;
             }
-            catch(Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500);
+                transaction.Rollback();
+                return false;
             }
         }
 
@@ -122,6 +156,7 @@ namespace ChatApp.Controllers
                     try
                     {
                         group.IsActive = false;
+                        dbContext.Groups.Update(group);
                         dbContext.EndConversationRequests.Remove(request);
                         dbContext.SaveChanges();
                         transaction.Commit();
@@ -129,6 +164,7 @@ namespace ChatApp.Controllers
                     catch(Exception)
                     {
                         transaction.Rollback();
+                        throw new Exception("Error when execute transaction");
                     }
                 }
 
