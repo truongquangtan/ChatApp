@@ -22,8 +22,11 @@ var requestToContact = function (userId) {
         url: '/Respondent/RequestContact',
         data: { userId: userId },
         cache: false,
+        success: function () {
+            alert("Send request successfully");
+        },
         error: function (err) {
-            alert('Error when get contact');
+            alert(err.responseText);
         }
     });
 }

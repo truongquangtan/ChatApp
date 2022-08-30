@@ -40,7 +40,7 @@ namespace ChatApp.Controllers
                 {
                     if(group.IsBeingEndRequested && group.IsActive)
                     {
-                        await chatService.CheckGroupBeingEndRequested(dbContext, group);
+                        await chatService.CheckIfGroupBeingEndRequestedWasExpired(dbContext, group);
                     }    
                     var message = await chatService.GetLastMessageOfGroup(group.Id);
                     if(message != null)

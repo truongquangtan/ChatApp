@@ -24,14 +24,13 @@
             <div class="top">
                 @if (Model.AuthorRole == RoleName.USER)
                 {
-                        <button class="btn btn-primary" onclick="requestToContact('@Model.AuthorId')">I want to be supported</button>
+                        <button class="btn btn-primary" onclick="requestToContact('@Model.AuthorId')" title="I want to be supported"><i class="fa fa-user-plus"></i></button>
                 }
                 else
                 {
-                    <form method="GET" asp-controller="Respondent" asp-action="GetContact">
-                        <button type="submit" class="btn btn-primary">Get Contact</button>
-                    </form>
+                    <button class="btn btn-primary" title="Get Contact"><a asp-controller="Respondent" asp-action="GetContact" class="navigate"><i class="fa fa-user-plus"></i></a></button>
                 }
+                <button class="btn btn-primary" title="logout"><a asp-controller="Account" asp-action="Logout" class="navigate"><i class="fa fa-power-off"></i></a></button>
                 <input type="text" placeholder="Search" />
 
             </div>

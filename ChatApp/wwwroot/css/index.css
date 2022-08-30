@@ -137,3 +137,13 @@ body {
                 .middle .people .person:hover:after {
                     display: none;
                 }
+
+        a {
+            text-decoration: none;
+        }
+        .navigate {
+            color: white;
+        }
+        button {
+            width: 2.5rem;
+        }

@@ -42,10 +42,9 @@ namespace ChatApp.Controllers
 
                 if(group == null || group.IsActive == false)
                 {
-                    throw new Exception("Group is not existed");
                     await _hubContext.Clients.User(user.Id).SendAsync("ReloadPageToIndex");
+                    throw new Exception("Group is not existed");
                 }
-
                 if (user.Id != group.FromUserId && user.Id != group.ToUserId)
                 {
                     throw new Exception("Group is not of user");
@@ -53,7 +52,7 @@ namespace ChatApp.Controllers
 
                 if (group.IsBeingEndRequested)
                 {
-                    if(await chatService.CheckGroupBeingEndRequested(dbContext, group))
+                    if(await chatService.CheckIfGroupBeingEndRequestedWasExpired(dbContext, group))
                     {
                         await _hubContext.Clients.User(user.Id).SendAsync("ReloadPageToIndex");
                         throw new Exception("The group is closed");
@@ -106,7 +105,7 @@ namespace ChatApp.Controllers
             }
         }
 
-        public async Task<bool> EndConversationRequestTransaction(User user, Group group)
+        private async Task<bool> EndConversationRequestTransaction(User user, Group group)
         {
             using var dbContext = new ChatAppImplementationContext();
             using var transaction = await dbContext.Database.BeginTransactionAsync();
@@ -122,11 +121,13 @@ namespace ChatApp.Controllers
                     CreatedAt = DateTime.Now,
                     Id = Guid.NewGuid().ToString()
                 };
-
                 dbContext.EndConversationRequests.Add(request);
+
                 group.IsBeingEndRequested = true;
                 dbContext.Groups.Update(group);
+
                 await dbContext.SaveChangesAsync();
+
                 await _hubContext.Clients.User(request.ConfirmUserId).SendAsync("RequestReached", request.Id);
                 await transaction.CommitAsync();
                 return true;
@@ -157,7 +158,9 @@ namespace ChatApp.Controllers
                     {
                         group.IsActive = false;
                         dbContext.Groups.Update(group);
+
                         dbContext.EndConversationRequests.Remove(request);
+
                         dbContext.SaveChanges();
                         transaction.Commit();
                     }

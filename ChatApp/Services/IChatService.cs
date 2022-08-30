@@ -12,6 +12,7 @@ namespace ChatApp.Services
         public Task<List<Message>> GetAllMessagesInGroupAsync(string groupId);
         public Task<List<Group>> GetAllGroupsContain(User user);
         public Task<Message> GetLastMessageOfGroup(string groupId);
-        public Task<bool> CheckGroupBeingEndRequested(ChatAppImplementationContext dbContext, Group group);
+        public Task<bool> CheckIfGroupBeingEndRequestedWasExpired(ChatAppImplementationContext dbContext, Group group);
+        public Task<int> CountAllActiveGroupContain(User user);
     }
 }

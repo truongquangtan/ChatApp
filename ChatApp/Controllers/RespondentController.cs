@@ -45,6 +45,11 @@ namespace ChatApp.Controllers
 
             var userRequested = await dbContext.Users.Where(user => user.Id == userId).FirstOrDefaultAsync();
 
+            if(await chatService.CountAllActiveGroupContain(userRequested) > MaxNumberOfConversationActive.MAX_NUMBER)
+            {
+                return new ObjectResult("You have a lot of active conversation, please end some conversations before request!") { StatusCode = 500 };
+            }    
+
             var userDTO = new UserDTO
             {
                 Email = userRequested.Email,

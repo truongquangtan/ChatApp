@@ -97,7 +97,7 @@ namespace ChatApp.Services
             return message;
         }
 
-        public async Task<bool> CheckGroupBeingEndRequested(ChatAppImplementationContext dbContext, Group group)
+        public async Task<bool> CheckIfGroupBeingEndRequestedWasExpired(ChatAppImplementationContext dbContext, Group group)
         {
             var endRequest = dbContext.EndConversationRequests.Where(request => request.GroupId == group.Id).FirstOrDefault();
             if (endRequest != null && endRequest.CreatedAt.AddMinutes(TimeRequestExist.TIME_EXIST_IN_MINUTE).CompareTo(DateTime.Now) < 0)
@@ -119,6 +119,12 @@ namespace ChatApp.Services
                 }
             }
             return false;
+        }
+
+        public async Task<int> CountAllActiveGroupContain(User user)
+        {
+            var result = await dbContext.Groups.CountAsync(group => group.IsActive == true && (group.FromUserId == user.Id || group.ToUserId == user.Id));
+            return result;
         }
 
     }

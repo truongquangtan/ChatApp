@@ -15,13 +15,11 @@ namespace ChatApp.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly RoleManager<Role> _roleManager;
 
         public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<Role> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _roleManager = roleManager;
         }
 
         [HttpGet]
@@ -79,7 +77,6 @@ namespace ChatApp.Controllers
                     Email = request.Email,
                     Phone = request.Phone
                 };
-
                 var result = await _userManager.CreateAsync(user, request.Password);
                 if (result.Succeeded)
                 {
@@ -87,21 +84,17 @@ namespace ChatApp.Controllers
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Home");
                 }
-                else
+                var errorString = "";
+                foreach(var error in result.Errors.ToList())
                 {
-                    var errors = result.Errors.ToList();
-                    var errorString = "";
-                    foreach(var error in errors)
-                    {
-                        errorString += error.Description;
-                    }
-                    TempData["generalError"] = errorString;
-                }    
+                    errorString += error.Description;
+                }
+                TempData["generalError"] = errorString;
             }
             else
             {
                 TempData["generalError"] = "Your input is not valid, please fill all require field";
-            }    
+            }
             return RedirectToAction("Register", "Account");
         }
 
