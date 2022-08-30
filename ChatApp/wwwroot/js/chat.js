@@ -18,8 +18,8 @@ connection.on("ReloadPageToIndex", function () {
 
 connection.on("RequestReached", function (requestId) {
     var ref = "/Chat/ConfirmEndConversation?requestId=" + requestId;
-    $(".chat").append('<div class="bubble other">' +
-        '<span class="message-notice">Your partner requested to end the conversation. <a href=' + ref + ' >Confirm</a ></span > ' +
+    $(".chat").append('<div class="bubble notice">' +
+        '<span class="message-notice-red">Your partner requested to end the conversation. <a href=' + ref + ' >Confirm</a ><br>If you do not confirm, the conversation is ended after 10 minutes.</span > ' +
         '</div> ');
 });
 
@@ -73,20 +73,22 @@ $(".write input").keyup(function (event) {
 });
 
 var endConversation = function (groupId) {
-    $.ajax({
-        type: 'POST',
-        url: '/Chat/EndConversationRequest',
-        data: { groupId: groupId },
-        cache: false,
-        success: function () {
-            $(".chat").append('<div class="bubble me">' +
-                '<span class="message-notice">Send end conversation request successfully</span>' +
-                '</div> ');
-        },
-        error: function (err) {
-            $(".chat").append('<div class="bubble me">' +
-                '<span class="message-notice">Send error</span>' +
-                '</div>');
-        }
-    });
+    if (confirm("Are you sure to end this conversation?")) {
+        $.ajax({
+            type: 'POST',
+            url: '/Chat/EndConversationRequest',
+            data: { groupId: groupId },
+            cache: false,
+            success: function () {
+                $(".chat").append('<div class="bubble notice">' +
+                    '<span class="message-notice-green">Send end conversation request successfully</span>' +
+                    '</div> ');
+            },
+            error: function (err) {
+                $(".chat").append('<div class="bubble notice">' +
+                    '<span class="message-notice-red">Send error</span>' +
+                    '</div>');
+            }
+        });
+    }
 };

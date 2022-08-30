@@ -38,7 +38,7 @@ namespace ChatApp.Controllers
 
                 foreach(var group in groups)
                 {
-                    if(group.IsBeingEndRequested)
+                    if(group.IsBeingEndRequested && group.IsActive)
                     {
                         await chatService.CheckGroupBeingEndRequested(dbContext, group);
                     }    

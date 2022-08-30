@@ -67,6 +67,10 @@
             float: right;
         }
 
+        .chat .bubble.notice {
+            float: right;
+        }
+
             .chat .bubble.me .message-text {
                 color: #fff;
             }
@@ -85,10 +89,13 @@
             font-size: 0.7rem;
         }
 
-        .chat .bubble .message-notice {
-            text-align: center;
+        .chat .bubble .message-notice-green {
+            color: green;
+            font-style: italic;
+        }
+        .chat .bubble .message-notice-red {
             color: red;
-            font-size: 0.7rem;
+            font-style: italic;
         }
 
 #writeDiv {
