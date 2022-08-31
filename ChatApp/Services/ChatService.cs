@@ -126,6 +126,22 @@ namespace ChatApp.Services
             var result = await dbContext.Groups.CountAsync(group => group.IsActive == true && (group.FromUserId == user.Id || group.ToUserId == user.Id));
             return result;
         }
+        public async Task<int> CountMessageSent(User user)
+        {
+            using var dbContext = new ChatAppImplementationContext();
+            var role = dbContext.UserRoles.Where(role => role.UserId == user.Id).FirstOrDefault();
+            if(role == null)
+            {
+                return 0;
+            }
+            var groupsContainUser = await dbContext.Groups.Where(group => group.FromUserId == user.Id || group.ToUserId == user.Id).ToListAsync();
+            int total = 0;
+            foreach(var group in groupsContainUser)
+            {
+                total += dbContext.Messages.Count(message => message.GroupId == group.Id && message.IsFromRespondent == (role.RoleName == RoleName.COLLABORATOR));
+            }
+            return total;
+        }
 
     }
 }

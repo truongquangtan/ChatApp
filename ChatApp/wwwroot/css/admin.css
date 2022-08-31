@@ -1,0 +1,30 @@
+﻿form {
+    display: inline;
+}
+a {
+    text-decoration: none;
+}
+
+.table-area {
+    margin: 10px;
+}
+.button-area {
+    margin: 10px;
+}
+.button-area h3 {
+    display: inline;
+}
+.button-area #input-search {
+    width: 400px;
+    height: 40px;
+    margin-left: 30px;
+}
+    .button-area select,button {
+        height: 40px;
+        margin-left: 20px;
+    }
+
+.link {
+    float: right;
+    margin-left: 5px;
+}

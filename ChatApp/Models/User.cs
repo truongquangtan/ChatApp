@@ -19,6 +19,7 @@ namespace ChatApp.Models
         public string? Email { get; set; }
         public string? Phone { get; set; }
         public string Password { get; set; }
+        public bool? IsActive { get; set; } = true;
 
         public virtual ICollection<Group> GroupFromUsers { get; set; }
         public virtual ICollection<Group> GroupToUsers { get; set; }

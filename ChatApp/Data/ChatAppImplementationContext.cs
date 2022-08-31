@@ -174,6 +174,9 @@ namespace ChatApp.Data
                     .HasMaxLength(100)
                     .IsUnicode(false)
                     .HasColumnName("username");
+
+                entity.Property(e => e.IsActive)
+                .HasColumnName("is_active");
             });
 
             modelBuilder.Entity<UserRole>(entity =>

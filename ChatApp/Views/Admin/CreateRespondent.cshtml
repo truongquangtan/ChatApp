@@ -1,0 +1,51 @@
+﻿@model ChatApp.Models.DTO.RegisterDTO;
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ChatApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ChatApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/login.css">
+</head>
+<body>
+
+<div class="wrapper fadeInDown">
+  <div id="formContent">
+    <!-- Tabs Titles -->
+    <a href="@Url.Action("Index", "Admin")" class="inactive underlineHover"> Admin Page </a>
+    <h2 class="active">Sign Up </h2>
+
+    <!-- Login Form -->
+    <form asp-controller="Admin" asp-action="CreateRespondent" method="POST">
+      <input type="text" asp-for="Username" class="fadeIn second" placeholder="Enter respondent username*"><br/>
+      <span asp-validation-for="Username" class="text-danger"></span>
+      <input type="password" asp-for="Password" class="fadeIn third" placeholder="Enter respondent password*"><br/>
+      <span asp-validation-for="Password" class="text-danger"></span>
+      <input type="password" asp-for="ConfirmPassword" class="fadeIn third" placeholder="Confirm password*"><br/>
+      <span class="text-danger">@TempData["confirmPasswordError"]</span>
+      <hr />
+      <input type="text" asp-for="FullName" class="fadeIn third" placeholder="Enter respondent display name*"><br/>
+      <span asp-validation-for="FullName" class="text-danger"></span>
+      <input type="text" asp-for="StudentId" class="fadeIn third" value="RESPONDENT" readonly><br/>
+      <span asp-validation-for="StudentId" class="text-danger"></span>
+      <input type="text" asp-for="Email" class="fadeIn third" placeholder="Enter respondent email"><br/>
+      <span asp-validation-for="Email" class="text-danger"></span>
+      <input type="text" asp-for="Phone" class="fadeIn third" placeholder="Nhập số điện thoại của bạn nhé"><br/>
+      <span asp-validation-for="Phone" class="text-danger"></span>
+      <input type="submit" class="fadeIn fourth" value="Register">
+    </form>
+    <span class="text-danger">@TempData["generalError"]</span>
+    <span class="text-secondary">@TempData["Success"]</span>
+  </div>
+</div>
+</body>
+</html>

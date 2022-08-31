@@ -14,5 +14,6 @@ namespace ChatApp.Services
         public Task<Message> GetLastMessageOfGroup(string groupId);
         public Task<bool> CheckIfGroupBeingEndRequestedWasExpired(ChatAppImplementationContext dbContext, Group group);
         public Task<int> CountAllActiveGroupContain(User user);
+        public Task<int> CountMessageSent(User user);
     }
 }

@@ -1,0 +1,77 @@
+﻿@using ChatApp.Supporters.Constants;
+@model List<ChatApp.Models.AdminViewModel>;
+@{
+    ViewData["Title"] = $"Admin Page";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ChatApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true"/>
+</head>
+<body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css" integrity="sha256-2XFplPlrFClt0bIdPgpz8H7ojnk10H69xRqd9+uTShA=" crossorigin="anonymous" />
+    <div class="container">
+        <div class="row table-area">
+            <div class="button-area">
+                <h3>Users</h3>
+                <form asp-controller="Admin" asp-action="Index">
+                    <input type="text" placeholder="Search" id="input-search" name="searchKey"/>
+                    <select name="roleFilter" title="role">
+                        <option value="@RoleName.USER">@RoleName.USER</option>
+                        <option value="@RoleName.COLLABORATOR">@RoleName.COLLABORATOR</option>
+                        <option value="All" selected>All</option>
+                    </select>
+                    <button type="submit" name="action" value="search" class="btn-primary">Search</button>
+                </form>
+                <a asp-controller="Account" asp-action="Logout" class="btn btn-primary link"><i class="fa fa-power-off"></i></a>
+                <a asp-controller="Admin" asp-action="CreateRespondent" class="btn btn-primary link"><i class="fa fa-cog"></i> Create respondent</a>
+            </div>
+            <div><span class="text-center text-success">@TempData["Success"]</span><span class="text-danger">@TempData["Error"]</span></div>
+            <div class="table-area">
+                <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <td>Username</td>
+                        <td>Full Name</td>
+                        <td>Role</td>
+                        <td>Message Sent</td>
+                        <td>Email</td>
+                        <td>Action</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var user in Model)
+                        {
+                            var routeValue = new Dictionary<string, string> { { "userId", user.UserId } };
+                            <tr id="@user.UserId">
+                                <td>@user.Username</td>
+                                <td>@user.FullName</td>
+                                <td>@user.Role</td>
+                                <td>@user.MessageSent</td>
+                                <td>@user.Email</td>
+                                @if(user.IsActive)
+                                {
+                                    <td><a asp-controller="Admin" asp-action="Interdict" asp-all-route-data="@routeValue"><i class="fa fa-lock"></i></a></td>
+                                }
+                                else
+                                {
+                                    <td><a asp-controller="Admin" asp-action="Permit" asp-all-route-data="@routeValue"><i class="fa fa-unlock"></i></a></td>
+                                }
+                            </tr>
+                        }
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
